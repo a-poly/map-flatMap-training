@@ -17,7 +17,11 @@ import scala.util.Left;
 import scala.util.Right;
 
 import java.net.ConnectException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import errors.GenericError;
 
@@ -194,6 +198,55 @@ public class WorkWithFuturesUsingMonadTransormerTest {
         assertThat(sumAge.right().get()).isEqualTo(112);
     }
 
+    @Test
+    public void combineFourFutureWithMonadTransformer() throws Exception {
+        //given
+        Future<Either<GenericError,Person>> meFutureFuture = Futures.successful(new Right<>(new Person().setName("Juan").setAge(35)));
+        Future<Either<GenericError,Person>> myBestFriendFuture = Futures.successful(new Right<>(new Person().setName("Miguel").setAge(28)));
+        Future<Either<GenericError,Person>> anotherFriendFuture = Futures.successful(new Right<>(new Person().setName("Eva").setAge(49)));
+        Future<Either<GenericError,Person>> friendFuture = Futures.successful(new Right<>(new Person().setName("Ivan").setAge(20)));
+
+        //when
+        Future<Either<GenericError, Integer>> sumAgeF =
+                wrap(meFutureFuture, monadTransformer)
+                    .map4(
+                            myBestFriendFuture,
+                            anotherFriendFuture,
+                            friendFuture,
+                            (me, bestFriend, anotherFriend, friend) -> me.getAge() + bestFriend.getAge() + anotherFriend.getAge() + friend.getAge()
+                    ).value();
+
+
+        //then
+        Either<GenericError, Integer> sumAge = (Either<GenericError, Integer>) Await.result(sumAgeF, TIMEOUT.duration());
+        assertThat(sumAge.right().get()).isEqualTo(132);
+    }
+
+    @Test
+    public void combineListOfFuturesWithMonadTransformer() throws Exception {
+        //given
+        List<Future<Either<GenericError,Person>>> friends = getFriends();
+
+        //when
+        Future<Either<GenericError, List<String>>> namesF =
+                            wrap(monadTransformer.sequence(friends), monadTransformer)
+                                .map(people -> people.stream().map(person -> person.getName()).collect(Collectors.toList()))
+                                .value();
+
+
+        //then
+        Either<GenericError, List<String>> names = (Either<GenericError, List<String>>) Await.result(namesF, TIMEOUT.duration());
+        assertThat(names.right().get()).contains("Juan", "Miguel", "Eva");
+    }
+
+    private List<Future<Either<GenericError,Person>>> getFriends() {
+
+        return Arrays.asList(
+                Futures.successful(new Right<>(new Person().setName("Juan").setAge(35))),
+                Futures.successful(new Right<>(new Person().setName("Miguel").setAge(28))),
+                Futures.successful(new Right<>(new Person().setName("Eva").setAge(49)))
+        );
+    }
 
     private Future<Either<GenericError,Person>> getFriend(String name) {
 
