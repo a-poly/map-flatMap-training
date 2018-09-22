@@ -60,7 +60,7 @@ public class MonadFutEitherError implements MonadFutEither<GenericError> {
 	}
 
 	@Override
-    public <T> MonadFutEitherWrapper dslFrom(Future<Either<GenericError, T>> future) {
+    public <T> MonadFutEitherWrapper<GenericError, T> dslFrom(Future<Either<GenericError, T>> future) {
 	    return wrap(future, this);
     }
 }

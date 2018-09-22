@@ -121,5 +121,5 @@ public interface MonadFutEither<E> {
 		}
 	}
 
-    <T> MonadFutEitherWrapper dslFrom(Future<Either<GenericError, T>> future);
+    <T> MonadFutEitherWrapper<GenericError, T> dslFrom(Future<Either<GenericError, T>> future);
 }
