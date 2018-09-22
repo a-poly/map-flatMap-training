@@ -8,6 +8,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import akka.dispatch.Futures;
+import errors.GenericError;
 import function.Function3;
 import function.Function4;
 import scala.concurrent.Future;
@@ -119,4 +120,6 @@ public interface MonadFutEither<E> {
 			});
 		}
 	}
+
+    <T> MonadFutEitherWrapper dslFrom(Future<Either<GenericError, T>> future);
 }
