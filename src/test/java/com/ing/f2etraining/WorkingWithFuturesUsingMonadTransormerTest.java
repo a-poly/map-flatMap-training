@@ -60,7 +60,7 @@ public class WorkingWithFuturesUsingMonadTransormerTest {
         Future<Either<GenericError, String>> nameF =
                 wrap(personFuture, monadTransformer)
                         .map(person -> person.getName())
-                        .recover(error -> "DEFAULT_VALUE")
+                        .handleError(error -> "DEFAULT_VALUE")
                         .value();
 
         //then
@@ -77,7 +77,7 @@ public class WorkingWithFuturesUsingMonadTransormerTest {
         Future<Either<GenericError, String>> nameF =
                 wrap(personFuture, monadTransformer)
                         .map(person -> person.getName())
-                        .recover(error -> "DEFAULT_VALUE")
+                        .handleError(error -> "DEFAULT_VALUE")
                         .value();
 
 
@@ -104,7 +104,7 @@ public class WorkingWithFuturesUsingMonadTransormerTest {
 
         /*Future<Either<GenericError, Integer>> sumAgeF = wrap(meFuture,monadTransformer)
                 .map2(friendFuture,(me,friend)->me.getAge()+friend.getAge())
-                .recover(genericError -> -1)
+                .handleError(genericError -> -1)
                 .value();;*/
         Future<Either<GenericError, Integer>> sumAgeF =
                 wrap(meFuture, monadTransformer)
@@ -128,7 +128,7 @@ public class WorkingWithFuturesUsingMonadTransormerTest {
         Future<Either<GenericError, Integer>> sumAgeF =
                 wrap(meFuture, monadTransformer)
                         .map2(friendFuture, (me, friend) -> me.getAge() + friend.getAge())
-                        .recover(error -> -1)
+                        .handleError(error -> -1)
                         .value();
 
 
@@ -170,7 +170,7 @@ public class WorkingWithFuturesUsingMonadTransormerTest {
         Future<Either<GenericError, Integer>> sumAgeF =
                 wrap(meFuture, monadTransformer)
                         .map2(friendFuture, (me, friend) -> me.getAge() + friend.getAge())
-                        .recover(error -> -1)
+                        .handleError(error -> -1)
                         .value();
 
 
