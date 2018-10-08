@@ -27,17 +27,17 @@ public class SummaryServiceImpl implements SummaryService<GenericError> {
 			ServiceSales<GenericError> srvSales,
 			ServiceChapter<GenericError> srvChapter,
 			ServiceAuthor<GenericError> srvAuthor,
-			MonadFutEither<GenericError> m) {
+			MonadFutEither<GenericError> monadTransformer) {
 		super();
 		this.srvBook = srvBook;
 		this.srvSales = srvSales;
 		this.srvChapter = srvChapter;
 		this.srvAuthor = srvAuthor;
-		this.m = m;
+		this.m = monadTransformer;
 	}
 
 	@Override
-	public Future<Either<GenericError, Summary>> getSummary(Integer idBook) {
+	public Future<Either<GenericError, Summary>> getSummary(Integer bookId) {
 
 
 		//TODO: Code the logic to build a Future<Either<GenericError, Summary>>
