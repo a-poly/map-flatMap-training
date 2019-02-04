@@ -19,7 +19,7 @@ import static monad.MonadFutEitherWrapper.wrap;
 
 public class MonadFutEitherError implements MonadFutEither<GenericError> {
 	
-	final ExecutionContext ec;
+	private final ExecutionContext ec;
 	
 	
 	public MonadFutEitherError(ExecutionContext ec) {
@@ -50,7 +50,7 @@ public class MonadFutEitherError implements MonadFutEither<GenericError> {
 	}
 
 	@Override
-	public <T> Future<Either<GenericError, T>> recoverWith(
+	public <T> Future<Either<GenericError, T>> handleErrorWith(
 			Future<Either<GenericError, T>> from,
 			Function<GenericError, Future<Either<GenericError, T>>> f) {
 		

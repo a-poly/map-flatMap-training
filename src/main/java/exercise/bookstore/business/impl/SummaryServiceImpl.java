@@ -48,7 +48,7 @@ public class SummaryServiceImpl implements SummaryService<GenericError> {
 		Future<Either<GenericError, Book>> bookF = this.srvBook.getBook(idBook);
 		Future<Either<GenericError, Optional<Sales>>> salesF = m.dslFrom(this.srvSales.getSales(idBook))
 				.map(sales -> Optional.of(sales))
-				.recover(error -> Optional.empty())
+				.handleError(error -> Optional.empty())
 				.value();
 		Future<Either<GenericError, Author>> authorF = m.flatMap(
 				bookF,
@@ -73,7 +73,7 @@ public class SummaryServiceImpl implements SummaryService<GenericError> {
 		);
 
 		return m.dslFrom(summaryF)
-				.recoverWith(
+				.handleErrorWith(
 						error -> m.raiseError(new MyError("It is impossible to get book summary"))
 				).value();
 	}
