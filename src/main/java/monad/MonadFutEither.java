@@ -1,18 +1,18 @@
 package monad;
 
 
+import errors.GenericError;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import akka.dispatch.Futures;
-import errors.GenericError;
 import function.Function3;
 import function.Function4;
 import scala.concurrent.Future;
 import scala.util.Either;
+
 
 public interface MonadFutEither<E> {
 
@@ -27,7 +27,7 @@ public interface MonadFutEither<E> {
 
 	<T> Future<Either<E,T>> raiseError( E error );
 
-	<T> Future<Either<E,T>> recoverWith( Future<Either<E, T>> from, Function<E, Future<Either<E,T>>> f );
+	<T> Future<Either<E,T>> handleErrorWith( Future<Either<E, T>> from, Function<E, Future<Either<E,T>>> f );
 
 	/**
 	 * Deriveds
@@ -39,9 +39,9 @@ public interface MonadFutEither<E> {
 
 	}
 
-	default <T> Future<Either<E,T>> recover( Future<Either<E,T>> from, Function<E, T> f ) {
+	default <T> Future<Either<E,T>> handleError( Future<Either<E,T>> from, Function<E, T> f ) {
 
-		return recoverWith(from, t -> pure(f.apply(t)));
+		return handleErrorWith(from, t -> pure(f.apply(t)));
 
 	}
 
@@ -79,13 +79,11 @@ public interface MonadFutEither<E> {
 
 	}
 
-	default <A,B,C,T> scala.concurrent.Future<Either<E,T>> map3( Future<Either<E, A>> fromA,
+	default <A,B,C,T> Future<Either<E,T>> map3( Future<Either<E, A>> fromA,
 																 Future<Either<E, B>> fromB,
 																 Future<Either<E, C>> fromC,
 																 Function3<A,B,C,T> f  ) {
 
-		// tambien: flatMap(fromA, a -> flatMap(fromB, b -> map(fromC, c-> f.apply(a, b, c))));
-		// tambien flatMap2(fromA, fromB, (a, b) -> map(fromC, c -> f.apply(a, b, c)));
 		return flatMap(fromA, a -> map2(fromB, fromC, (b, c)-> f.apply(a, b, c)));
 
 	}

@@ -1,12 +1,19 @@
 package com.ing.f2etraining;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import akka.dispatch.ExecutionContexts;
 import akka.dispatch.Futures;
 import akka.util.Timeout;
 import com.ing.f2etraining.model.Person;
+import errors.GenericError;
 import errors.impl.MyError;
+import java.net.ConnectException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 import monad.MonadFutEither;
-import monad.MonadFutEitherWrapper;
 import monad.impl.MonadFutEitherError;
 import org.junit.Test;
 import scala.concurrent.Await;
@@ -17,17 +24,7 @@ import scala.util.Either;
 import scala.util.Left;
 import scala.util.Right;
 
-import java.net.ConnectException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
-
-import errors.GenericError;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-public class WorkWithFuturesUsingMonadTransormerTest {
+public class WorkingWithFuturesUsingMonadTransormerTest {
 
     private static final ExecutionContext EXECUTOR = ExecutionContexts.fromExecutor(Executors.newSingleThreadExecutor());
     private static final Timeout TIMEOUT = new Timeout(Duration.create(5, "seconds"));
@@ -41,8 +38,6 @@ public class WorkWithFuturesUsingMonadTransormerTest {
 
         //when
         // REMEMBER: Future<String> nameF = personFuture.map( person -> person.right().get().getName() , EXECUTOR);
-
-        MonadFutEitherWrapper monadFutEitherWrapper = monadTransformer.dslFrom(personFuture);
 
         Future<Either<GenericError,String>> nameF = monadTransformer.dslFrom(personFuture).map(person -> person.getName()).value();
 
@@ -60,7 +55,7 @@ public class WorkWithFuturesUsingMonadTransormerTest {
         Future<Either<GenericError, String>> nameF =
                 monadTransformer.dslFrom(personFuture)
                         .map(person -> person.getName())
-                        .recover(error -> "DEFAULT_VALUE")
+                        .handleError(error -> "DEFAULT_VALUE")
                         .value();
 
         //then
@@ -77,7 +72,7 @@ public class WorkWithFuturesUsingMonadTransormerTest {
         Future<Either<GenericError, String>> nameF =
                 monadTransformer.dslFrom(personFuture)
                         .map(person -> person.getName())
-                        .recover(error -> "DEFAULT_VALUE")
+                        .handleError(error -> "DEFAULT_VALUE")
                         .value();
 
 
@@ -102,6 +97,10 @@ public class WorkWithFuturesUsingMonadTransormerTest {
                 ,EXECUTOR);
          */
 
+        /*Future<Either<GenericError, Integer>> sumAgeF = monadTransformer.dslFrom(meFuture,monadTransformer)
+                .map2(friendFuture,(me,friend)->me.getAge()+friend.getAge())
+                .handleError(genericError -> -1)
+                .value();;*/
         Future<Either<GenericError, Integer>> sumAgeF =
                 monadTransformer.dslFrom(meFuture)
                         .map2(friendFuture, (me, friend) -> me.getAge() + friend.getAge())
@@ -124,7 +123,7 @@ public class WorkWithFuturesUsingMonadTransormerTest {
         Future<Either<GenericError, Integer>> sumAgeF =
                 monadTransformer.dslFrom(meFuture)
                         .map2(friendFuture, (me, friend) -> me.getAge() + friend.getAge())
-                        .recover(error -> -1)
+                        .handleError(error -> -1)
                         .value();
 
 
@@ -138,7 +137,7 @@ public class WorkWithFuturesUsingMonadTransormerTest {
         //given
         Future<Either<GenericError,Person>> meFuture = Futures.successful(new Right<>(new Person().setName("Juan").setAge(35)));
 
-        //NOTE: Use service Future<Person> getFriend(String name) to get the other person
+        //NOTE: Use service Future<Person> getFriend(String name)
 
         //when
         Future<Either<GenericError, Person>> friendFuture = monadTransformer.dslFrom(meFuture).flatMap(me -> getFriend(me.getName())).value();
@@ -166,7 +165,7 @@ public class WorkWithFuturesUsingMonadTransormerTest {
         Future<Either<GenericError, Integer>> sumAgeF =
                 monadTransformer.dslFrom(meFuture)
                         .map2(friendFuture, (me, friend) -> me.getAge() + friend.getAge())
-                        .recover(error -> -1)
+                        .handleError(error -> -1)
                         .value();
 
 
@@ -225,7 +224,7 @@ public class WorkWithFuturesUsingMonadTransormerTest {
 
         //when
         Future<Either<GenericError, List<String>>> namesF =
-                        monadTransformer.dslFrom(monadTransformer.sequence(friends))
+                            monadTransformer.dslFrom(monadTransformer.sequence(friends))
                                 .map(people -> people.stream().map(person -> person.getName()).collect(Collectors.toList()))
                                 .value();
 
